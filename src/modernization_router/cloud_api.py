@@ -152,7 +152,10 @@ async def route_request(
     try:
         result = await ai.run(
             request.task,
-            [ChatMessage(role=message.role, content=message.content) for message in request.messages],
+            [
+                ChatMessage(role=message.role, content=message.content)
+                for message in request.messages
+            ],
             privacy=request.privacy,
             allow_premium_fallback=request.allow_premium_fallback,
             estimated_input_tokens=request.estimated_input_tokens,
@@ -161,7 +164,9 @@ async def route_request(
             metadata=request.metadata,
         )
     except NoEligibleModelsError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        ) from exc
     except AllModelsFailedError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -179,6 +184,9 @@ async def route_request(
             total_tokens=result.usage.total_tokens,
             cost_usd=result.usage.cost_usd,
         ),
-        attempts=[AttemptOutput.model_validate(attempt, from_attributes=True) for attempt in result.attempts],
+        attempts=[
+            AttemptOutput.model_validate(attempt, from_attributes=True)
+            for attempt in result.attempts
+        ],
         used_premium_fallback=result.used_premium_fallback,
     )
