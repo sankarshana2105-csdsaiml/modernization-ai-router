@@ -84,7 +84,11 @@ class RouteOutput(BaseModel):
 
 
 def _gateway_configured() -> bool:
-    return bool(os.getenv("AI_GATEWAY_API_KEY") or os.getenv("VERCEL_OIDC_TOKEN"))
+    return bool(
+        os.getenv("OPENROUTER_API_KEY")
+        or os.getenv("AI_GATEWAY_API_KEY")
+        or os.getenv("VERCEL_OIDC_TOKEN")
+    )
 
 
 @lru_cache(maxsize=1)

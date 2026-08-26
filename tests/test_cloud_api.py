@@ -44,6 +44,8 @@ async def test_health_is_public_and_reports_configuration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("VERCEL_OIDC_TOKEN", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("AI_GATEWAY_API_KEY", raising=False)
     monkeypatch.delenv("ROUTER_ACCESS_KEY", raising=False)
 
     response = await client.get("/healthz")
