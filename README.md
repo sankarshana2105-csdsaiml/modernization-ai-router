@@ -82,6 +82,37 @@ Copy `config/router.example.toml` to a deployment-specific file and change provi
 
 For a local zero-cost model, install Ollama separately and make the configured model available. The sample expects an OpenAI-compatible endpoint at `http://127.0.0.1:11434/v1`.
 
+## Protected cloud API
+
+The repository includes a FastAPI entrypoint for Vercel. The cloud configuration uses Vercel's automatically injected OIDC token with its OpenAI-compatible AI Gateway, so no provider credential is committed to GitHub.
+
+Cloud endpoints:
+
+- `GET /` - service information
+- `GET /healthz` - public liveness and configuration status
+- `GET /docs` - OpenAPI interface documentation
+- `POST /v1/route` - protected model-routing endpoint
+
+Set a long random `ROUTER_ACCESS_KEY` in the Vercel project's Production environment before enabling AI requests. Clients send it as a bearer credential:
+
+```powershell
+$headers = @{ Authorization = "Bearer $env:ROUTER_ACCESS_KEY" }
+$body = @{
+  task = "code_analysis"
+  messages = @(@{ role = "user"; content = "Inspect this public example" })
+  privacy = "public"
+} | ConvertTo-Json -Depth 4
+
+Invoke-RestMethod `
+  -Uri "https://YOUR-DEPLOYMENT.vercel.app/v1/route" `
+  -Method Post `
+  -Headers $headers `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+The included cloud models are deliberately not approved for proprietary code. A `proprietary` or `local_only` request therefore fails closed until the owner reviews provider data terms and explicitly changes the policy. The Docker execution worker is also not exposed by this serverless API; run it on a dedicated container host with the documented isolation controls.
+
 ## SaaS integration
 
 ```python
