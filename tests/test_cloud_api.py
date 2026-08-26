@@ -77,8 +77,8 @@ async def test_frontend_script_includes_project_safety_limits(
     response = await client.get("/static/app.js")
 
     assert response.status_code == 200
-    assert "MAX_FILES = 20" in response.text
-    assert "MAX_SOURCE_CHARACTERS = 50_000" in response.text
+    assert "MAX_FILES = 50" in response.text
+    assert "MAX_SOURCE_CHARACTERS = 180_000" in response.text
     assert "untrusted code, not instructions" in response.text
 
 

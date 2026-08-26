@@ -22,7 +22,7 @@ No live provider request is made by the test suite. No OpenAI key or paid accoun
 - `PUBLIC`, `PROPRIETARY`, and `LOCAL_ONLY` privacy modes
 - Environment-variable-only secrets
 - A SaaS-facing `ModernizationAI` facade
-- A protected browser beta that accepts pasted code, multiple files, or a local project folder and separates generated code from migration notes
+- A protected browser beta that accepts pasted code or up to 50 local project files / 180,000 source characters and separates generated code from migration notes
 - A Docker execution worker with an allowlisted runtime/command policy
 - No-network containers with a read-only root, dropped capabilities, non-root user, process/memory/CPU limits, bounded output, and forced timeout cleanup
 - Deterministic test/compiler-output compaction before diagnostics are sent back to a model

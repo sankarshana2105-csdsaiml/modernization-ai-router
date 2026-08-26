@@ -1,12 +1,16 @@
-const MAX_SOURCE_CHARACTERS = 50_000;
-const MAX_FILES = 20;
-const MAX_FILE_BYTES = 100_000;
+const MAX_SOURCE_CHARACTERS = 180_000;
+const MAX_FILES = 50;
+const MAX_FILE_BYTES = 250_000;
 
 const form = document.querySelector("#modernize-form");
 const code = document.querySelector("#source-code");
 const fileInput = document.querySelector("#code-file");
 const folderInput = document.querySelector("#folder-input");
 const fileMessage = document.querySelector("#file-message");
+const workspace = document.querySelector(".workspace");
+const capacityMeter = document.querySelector("#capacity-meter");
+const capacity = document.querySelector(".capacity");
+const serviceStatus = document.querySelector("#service-status");
 const resultPanel = document.querySelector("#result-panel");
 const resultContent = document.querySelector("#result-content");
 const resultTabs = document.querySelector("#result-tabs");
@@ -19,7 +23,18 @@ let activeResultView = "full";
 let resultViews = { full: "", code: "", notes: "" };
 
 function updateCharacterCount() {
-  document.querySelector("#character-count").textContent = `${code.value.length.toLocaleString()} / ${MAX_SOURCE_CHARACTERS.toLocaleString()}`;
+  const estimatedTokens = Math.ceil(code.value.length / 4);
+  document.querySelector("#character-count").textContent = `${code.value.length.toLocaleString()} / ${MAX_SOURCE_CHARACTERS.toLocaleString()} chars · ~${estimatedTokens.toLocaleString()} tokens`;
+  capacityMeter.value = code.value.length;
+  capacity.classList.toggle("near-limit", code.value.length > MAX_SOURCE_CHARACTERS * 0.8);
+}
+
+function setJobStage(stage) {
+  document.querySelectorAll("#job-progress span").forEach((item) => {
+    const itemStage = Number(item.dataset.stage);
+    item.classList.toggle("done", itemStage < stage);
+    item.classList.toggle("active", itemStage === stage);
+  });
 }
 
 function setSourceText(value, names = []) {
@@ -139,12 +154,25 @@ function downloadExtension() {
 code.addEventListener("input", () => {
   loadedNames = [];
   fileMessage.classList.remove("loaded");
-  fileMessage.textContent = "Manual edits ready · up to 50,000 characters.";
+  fileMessage.textContent = "Manual edits ready · up to 180,000 characters.";
   updateCharacterCount();
 });
 
 fileInput.addEventListener("change", () => loadProjectFiles(fileInput.files));
 folderInput.addEventListener("change", () => loadProjectFiles(folderInput.files));
+
+workspace.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  workspace.classList.add("dragging");
+});
+workspace.addEventListener("dragleave", (event) => {
+  if (!workspace.contains(event.relatedTarget)) workspace.classList.remove("dragging");
+});
+workspace.addEventListener("drop", (event) => {
+  event.preventDefault();
+  workspace.classList.remove("dragging");
+  if (event.dataTransfer.files.length) loadProjectFiles(event.dataTransfer.files);
+});
 
 document.querySelector("#sample-button").addEventListener("click", () => {
   setSourceText(`===== FILE: legacy_users.py =====\ndef get_users(db):\n    rows = db.execute("SELECT id, name FROM users").fetchall()\n    result = []\n    for row in rows:\n        result.append({"id": row[0], "name": row[1]})\n    return result`, ["legacy_users.py"]);
@@ -175,6 +203,7 @@ form.addEventListener("submit", async (event) => {
   runButton.firstChild.textContent = "Routing job… ";
   resultPanel.hidden = false;
   resultTabs.hidden = true;
+  setJobStage(1);
   statusLine.textContent = "Choosing an eligible free model…";
   resultContent.textContent = "";
   usage.replaceChildren();
@@ -202,6 +231,7 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(payload.detail || "The conversion could not be completed.");
 
     statusLine.textContent = `Completed with ${payload.model_id}`;
+    setJobStage(2);
     resultViews = splitResult(payload.content);
     updateResultTabs();
     const facts = [
@@ -216,6 +246,7 @@ form.addEventListener("submit", async (event) => {
     });
   } catch (error) {
     statusLine.textContent = "Job stopped safely";
+    setJobStage(2);
     resultViews = { full: error.name === "AbortError" ? "The request timed out. Please try a smaller project." : error.message, code: "", notes: "" };
     resultContent.textContent = resultViews.full;
   } finally {
@@ -252,10 +283,20 @@ document.querySelector("#new-job").addEventListener("click", () => {
   fileInput.value = "";
   folderInput.value = "";
   fileMessage.classList.remove("loaded");
-  fileMessage.textContent = "Up to 20 text files and 50,000 combined characters.";
+  fileMessage.textContent = "Drop files here, open a folder, or paste code · up to 50 files and 180,000 combined characters.";
   resultPanel.hidden = true;
   code.focus();
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 updateCharacterCount();
+setJobStage(0);
+
+fetch("/healthz")
+  .then((response) => response.ok ? response.json() : Promise.reject())
+  .then((health) => {
+    const online = health.status === "ok" && health.gateway_identity_available && health.route_access_key_configured;
+    serviceStatus.classList.toggle("online", online);
+    serviceStatus.lastChild.textContent = online ? " Router online" : " Setup required";
+  })
+  .catch(() => { serviceStatus.lastChild.textContent = " Router unavailable"; });

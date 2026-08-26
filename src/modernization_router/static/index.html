@@ -9,10 +9,20 @@
   </head>
   <body>
     <main>
+      <nav class="topbar" aria-label="Product status">
+        <a class="wordmark" href="/">MODERNIZATION AI</a>
+        <span id="service-status" class="service-status"><i></i> Checking router</span>
+      </nav>
       <header>
         <p class="eyebrow">PUBLIC BETA · MULTI-MODEL ROUTING</p>
         <h1>Modernize legacy code.</h1>
         <p class="lede">Paste code or load a small public project, choose the outcome, and let the router find an eligible free model automatically.</p>
+        <div class="hero-stats" aria-label="Beta capacity">
+          <span><strong>50</strong> files per job</span>
+          <span><strong>180K</strong> source characters</span>
+          <span><strong>~45K</strong> input tokens</span>
+          <span><strong>$0</strong> free-model routing</span>
+        </div>
       </header>
 
       <form id="modernize-form">
@@ -67,14 +77,17 @@
               <button id="sample-button" class="text-button" type="button">Use sample</button>
             </div>
           </div>
-          <p id="file-message" class="file-message" role="status">Up to 20 text files and 50,000 combined characters.</p>
+          <p id="file-message" class="file-message" role="status">Drop files here, open a folder, or paste code · up to 50 files and 180,000 combined characters.</p>
           <label class="sr-only" for="source-code">Legacy source code</label>
-          <textarea id="source-code" required maxlength="50000" spellcheck="false" placeholder="Paste legacy code here, or open files above…"></textarea>
+          <textarea id="source-code" required maxlength="180000" spellcheck="false" placeholder="Paste legacy code here, or drop project files into this panel…"></textarea>
           <div class="below-code">
             <label class="requirements">Extra instructions
               <input id="requirements" maxlength="500" placeholder="Example: preserve API behavior and explain breaking changes">
             </label>
-            <span id="character-count">0 / 50,000</span>
+            <div class="capacity">
+              <span id="character-count">0 / 180,000 chars</span>
+              <progress id="capacity-meter" max="180000" value="0">0%</progress>
+            </div>
           </div>
         </section>
 
@@ -99,6 +112,13 @@
             <button id="copy-result" type="button">Copy</button>
             <button id="download-result" type="button">Download</button>
           </div>
+        </div>
+        <div id="job-progress" class="job-progress" aria-label="Job progress">
+          <span data-stage="0"><b>1</b> Prepare</span>
+          <i></i>
+          <span data-stage="1"><b>2</b> Route</span>
+          <i></i>
+          <span data-stage="2"><b>3</b> Result</span>
         </div>
         <p id="status-line" class="status"></p>
         <div id="result-tabs" class="result-tabs" role="tablist" aria-label="Result view" hidden>
