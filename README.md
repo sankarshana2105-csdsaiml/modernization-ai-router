@@ -88,7 +88,7 @@ The repository includes a FastAPI entrypoint for Vercel. The cloud configuration
 
 Cloud endpoints:
 
-- `GET /` - service information
+- `GET /` - browser-based legacy-code modernization screen
 - `GET /healthz` - public liveness and configuration status
 - `GET /docs` - OpenAPI interface documentation
 - `POST /v1/route` - protected model-routing endpoint

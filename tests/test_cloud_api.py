@@ -15,13 +15,13 @@ class StubAI:
         return RouterResult(
             request_id="req-cloud-test",
             provider_id="vercel_gateway_google",
-            model_id="cloud-gemini-flash-lite",
+            model_id="cloud-gpt-nano",
             content="No issue found.",
             usage=Usage(input_tokens=20, output_tokens=5, cost_usd=0.0000185),
             attempts=(
                 Attempt(
                     provider_id="vercel_gateway_google",
-                    model_id="cloud-gemini-flash-lite",
+                    model_id="cloud-gpt-nano",
                     attempt_number=1,
                     outcome="success",
                     latency_ms=12.5,
@@ -54,6 +54,16 @@ async def test_health_is_public_and_reports_configuration(
         "gateway_identity_available": False,
         "route_access_key_configured": False,
     }
+
+
+@pytest.mark.asyncio
+async def test_root_serves_conversion_screen(client: httpx.AsyncClient) -> None:
+    response = await client.get("/")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Modernize legacy code" in response.text
+    assert response.headers["x-frame-options"] == "DENY"
 
 
 @pytest.mark.asyncio
@@ -108,7 +118,7 @@ async def test_route_returns_structured_router_result(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["model_id"] == "cloud-gemini-flash-lite"
+    assert payload["model_id"] == "cloud-gpt-nano"
     assert payload["content"] == "No issue found."
     assert payload["usage"]["total_tokens"] == 25
     assert payload["attempts"][0]["outcome"] == "success"

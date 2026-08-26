@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .config import build_router, load_config
@@ -16,6 +18,7 @@ from .service import ModernizationAI
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "router.cloud.toml"
+STATIC_ROOT = Path(__file__).resolve().parent / "static"
 
 
 class MessageInput(BaseModel):
@@ -118,17 +121,25 @@ app = FastAPI(
     version="0.2.0",
     description="Protected cloud API for policy-aware modernization model routing.",
 )
+app.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 
-@app.get("/")
-async def root() -> dict[str, object]:
-    return {
-        "service": "modernization-ai-router",
-        "status": "online",
-        "documentation": "/docs",
-        "health": "/healthz",
-        "route": "/v1/route",
-    }
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; script-src 'self'; style-src 'self'; "
+        "connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'"
+    )
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
+
+@app.get("/", response_class=FileResponse)
+async def root() -> FileResponse:
+    return FileResponse(STATIC_ROOT / "index.html")
 
 
 @app.get("/healthz")

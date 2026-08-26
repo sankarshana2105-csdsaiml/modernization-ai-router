@@ -33,6 +33,9 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+modernization_router = ["static/*"]
+
 [tool.pytest.ini_options]
 addopts = "-q"
 asyncio_mode = "auto"

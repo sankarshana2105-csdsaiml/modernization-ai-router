@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Convert and understand legacy code with privacy-aware multi-model routing.">
+    <title>Modernization AI — Public Beta</title>
+    <link rel="stylesheet" href="/static/app.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">PUBLIC BETA · MULTI-MODEL ROUTING</p>
+        <h1>Modernize legacy code.</h1>
+        <p class="lede">Paste a public code sample, choose the outcome, and let the router find the cheapest eligible model with automatic failover.</p>
+      </header>
+
+      <form id="modernize-form">
+        <section class="panel controls" aria-labelledby="setup-heading">
+          <div class="section-title">
+            <span>01</span>
+            <h2 id="setup-heading">Set the job</h2>
+          </div>
+          <div class="grid">
+            <label>Task
+              <select id="task">
+                <option value="refactoring">Convert code</option>
+                <option value="code_analysis">Analyze code</option>
+                <option value="debugging">Debug a problem</option>
+                <option value="test_generation">Generate tests</option>
+                <option value="architecture">Plan modernization</option>
+              </select>
+            </label>
+            <label>Source
+              <select id="source-language">
+                <option>Auto-detect</option>
+                <option>COBOL</option>
+                <option>Java</option>
+                <option>C#</option>
+                <option>PHP</option>
+                <option>Python</option>
+                <option>JavaScript</option>
+                <option>C / C++</option>
+                <option>Visual Basic</option>
+              </select>
+            </label>
+            <label>Target
+              <select id="target-language">
+                <option>Python + FastAPI</option>
+                <option>TypeScript + Node.js</option>
+                <option>Java + Spring Boot</option>
+                <option>C# + ASP.NET Core</option>
+                <option>Go</option>
+                <option>Modernize in the same language</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel workspace" aria-labelledby="code-heading">
+          <div class="section-title">
+            <span>02</span>
+            <h2 id="code-heading">Add your code</h2>
+            <label class="file-button">Open a text file<input id="code-file" type="file" accept=".txt,.py,.js,.ts,.java,.cs,.php,.c,.cpp,.h,.cob,.cbl"></label>
+          </div>
+          <label class="sr-only" for="source-code">Legacy source code</label>
+          <textarea id="source-code" required maxlength="50000" spellcheck="false" placeholder="Paste legacy code here…"></textarea>
+          <div class="below-code">
+            <label class="requirements">Extra instructions
+              <input id="requirements" maxlength="500" placeholder="Example: preserve API behavior and explain breaking changes">
+            </label>
+            <span id="character-count">0 / 50,000</span>
+          </div>
+        </section>
+
+        <section class="access-row">
+          <label class="key-field">Beta access key
+            <input id="access-key" type="password" required autocomplete="off" placeholder="Provided to beta testers">
+          </label>
+          <label class="consent">
+            <input id="public-confirmation" type="checkbox" required>
+            <span>I am authorized to process this code and understand this beta currently accepts public code only.</span>
+          </label>
+          <button id="run-button" type="submit">Run modernization <span>→</span></button>
+        </section>
+      </form>
+
+      <section id="result-panel" class="panel result" aria-live="polite" hidden>
+        <div class="section-title">
+          <span>03</span>
+          <h2>Result</h2>
+          <div class="result-actions">
+            <button id="copy-result" type="button">Copy</button>
+            <button id="download-result" type="button">Download</button>
+          </div>
+        </div>
+        <p id="status-line" class="status"></p>
+        <pre id="result-content"></pre>
+        <div id="usage" class="usage"></div>
+      </section>
+
+      <footer>
+        <span>Privacy-aware routing</span>
+        <span>Free/cheap models first</span>
+        <span>Automatic failover</span>
+        <a href="/docs">API docs</a>
+      </footer>
+    </main>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
