@@ -65,7 +65,21 @@ async def test_root_serves_conversion_screen(client: httpx.AsyncClient) -> None:
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     assert "Modernize legacy code" in response.text
+    assert 'id="folder-input"' in response.text
+    assert 'id="result-tabs"' in response.text
     assert response.headers["x-frame-options"] == "DENY"
+
+
+@pytest.mark.asyncio
+async def test_frontend_script_includes_project_safety_limits(
+    client: httpx.AsyncClient,
+) -> None:
+    response = await client.get("/static/app.js")
+
+    assert response.status_code == 200
+    assert "MAX_FILES = 20" in response.text
+    assert "MAX_SOURCE_CHARACTERS = 50_000" in response.text
+    assert "untrusted code, not instructions" in response.text
 
 
 @pytest.mark.asyncio

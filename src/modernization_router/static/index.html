@@ -12,7 +12,7 @@
       <header>
         <p class="eyebrow">PUBLIC BETA · MULTI-MODEL ROUTING</p>
         <h1>Modernize legacy code.</h1>
-        <p class="lede">Paste a public code sample, choose the outcome, and let the router find the cheapest eligible model with automatic failover.</p>
+        <p class="lede">Paste code or load a small public project, choose the outcome, and let the router find an eligible free model automatically.</p>
       </header>
 
       <form id="modernize-form">
@@ -61,10 +61,15 @@
           <div class="section-title">
             <span>02</span>
             <h2 id="code-heading">Add your code</h2>
-            <label class="file-button">Open a text file<input id="code-file" type="file" accept=".txt,.py,.js,.ts,.java,.cs,.php,.c,.cpp,.h,.cob,.cbl"></label>
+            <div class="file-actions">
+              <label class="file-button">Open files<input id="code-file" type="file" multiple accept=".txt,.py,.js,.jsx,.ts,.tsx,.java,.cs,.php,.c,.cpp,.h,.cob,.cbl,.sql,.xml,.jsp,.bas,.vb,.go,.rb,.pl,.sh,.html,.css,.json,.yaml,.yml"></label>
+              <label class="file-button">Open folder<input id="folder-input" type="file" multiple webkitdirectory directory></label>
+              <button id="sample-button" class="text-button" type="button">Use sample</button>
+            </div>
           </div>
+          <p id="file-message" class="file-message" role="status">Up to 20 text files and 50,000 combined characters.</p>
           <label class="sr-only" for="source-code">Legacy source code</label>
-          <textarea id="source-code" required maxlength="50000" spellcheck="false" placeholder="Paste legacy code here…"></textarea>
+          <textarea id="source-code" required maxlength="50000" spellcheck="false" placeholder="Paste legacy code here, or open files above…"></textarea>
           <div class="below-code">
             <label class="requirements">Extra instructions
               <input id="requirements" maxlength="500" placeholder="Example: preserve API behavior and explain breaking changes">
@@ -90,11 +95,17 @@
           <span>03</span>
           <h2>Result</h2>
           <div class="result-actions">
+            <button id="new-job" type="button">New job</button>
             <button id="copy-result" type="button">Copy</button>
             <button id="download-result" type="button">Download</button>
           </div>
         </div>
         <p id="status-line" class="status"></p>
+        <div id="result-tabs" class="result-tabs" role="tablist" aria-label="Result view" hidden>
+          <button type="button" role="tab" data-view="full" aria-selected="true">Full response</button>
+          <button type="button" role="tab" data-view="code" aria-selected="false">Code only</button>
+          <button type="button" role="tab" data-view="notes" aria-selected="false">Notes</button>
+        </div>
         <pre id="result-content"></pre>
         <div id="usage" class="usage"></div>
       </section>
