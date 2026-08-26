@@ -1,0 +1,186 @@
+[router]
+backoff_base_seconds = 0.25
+backoff_max_seconds = 4.0
+health_failure_threshold = 3
+health_cooldown_seconds = 30.0
+
+# Local OpenAI-compatible server. Ollama can expose /v1/chat/completions.
+[[providers]]
+id = "local_ollama"
+adapter = "openai_compatible"
+base_url = "http://127.0.0.1:11434/v1"
+enabled = true
+timeout_seconds = 120.0
+
+[[providers]]
+id = "openrouter"
+adapter = "openai_compatible"
+base_url = "https://openrouter.ai/api/v1"
+api_key_env = "OPENROUTER_API_KEY"
+enabled = true
+timeout_seconds = 90.0
+
+[[providers]]
+id = "gemini"
+adapter = "gemini"
+base_url = "https://generativelanguage.googleapis.com/v1beta"
+api_key_env = "GEMINI_API_KEY"
+enabled = false
+timeout_seconds = 90.0
+
+[[providers]]
+id = "groq"
+adapter = "openai_compatible"
+base_url = "https://api.groq.com/openai/v1"
+api_key_env = "GROQ_API_KEY"
+enabled = false
+timeout_seconds = 60.0
+
+[[providers]]
+id = "cerebras"
+adapter = "openai_compatible"
+base_url = "https://api.cerebras.ai/v1"
+api_key_env = "CEREBRAS_API_KEY"
+enabled = false
+timeout_seconds = 60.0
+
+[[providers]]
+id = "cloudflare_workers_ai"
+adapter = "openai_compatible"
+base_url = "https://api.cloudflare.com/client/v4/accounts/replace-account-id/ai/v1"
+base_url_env = "CLOUDFLARE_AI_BASE_URL"
+api_key_env = "CLOUDFLARE_API_TOKEN"
+enabled = false
+timeout_seconds = 90.0
+
+[[providers]]
+id = "github_models"
+adapter = "openai_compatible"
+base_url = "https://models.github.ai/inference"
+api_key_env = "GITHUB_MODELS_TOKEN"
+enabled = false
+timeout_seconds = 90.0
+extra_headers = { Accept = "application/vnd.github+json", X-GitHub-Api-Version = "2026-03-10" }
+
+# Enable only after verifying current NVIDIA API access and commercial terms.
+[[providers]]
+id = "nvidia_nim"
+adapter = "openai_compatible"
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key_env = "NVIDIA_API_KEY"
+enabled = false
+timeout_seconds = 90.0
+
+# Deliberately disabled until billing, spend caps, and privacy approval are configured.
+[[providers]]
+id = "openai_premium"
+adapter = "openai_compatible"
+base_url = "https://api.openai.com/v1"
+api_key_env = "OPENAI_API_KEY"
+enabled = false
+timeout_seconds = 90.0
+
+[[models]]
+id = "local-qwen-coder"
+provider_id = "local_ollama"
+upstream_model = "qwen2.5-coder:7b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 10
+is_local = true
+approved_for_proprietary = true
+requests_per_minute = 30
+tokens_per_minute = 100000
+max_retries = 1
+timeout_seconds = 120.0
+
+[[models]]
+id = "openrouter-free"
+provider_id = "openrouter"
+upstream_model = "openrouter/free"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 20
+approved_for_proprietary = false
+requests_per_day = 50
+max_retries = 1
+
+[[models]]
+id = "gemini-free-tier"
+provider_id = "gemini"
+upstream_model = "gemini-3.5-flash-lite"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 30
+approved_for_proprietary = false
+max_retries = 2
+
+[[models]]
+id = "groq-qwen-coder"
+provider_id = "groq"
+upstream_model = "qwen/qwen3.6-27b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "debugging"]
+cost_tier = "free"
+priority = 40
+approved_for_proprietary = false
+requests_per_minute = 30
+requests_per_day = 1000
+tokens_per_minute = 8000
+tokens_per_day = 200000
+max_retries = 1
+
+[[models]]
+id = "cloudflare-gemma"
+provider_id = "cloudflare_workers_ai"
+upstream_model = "@cf/google/gemma-4-26b-a4b-it"
+capabilities = ["code_analysis", "refactoring", "test_generation", "debugging"]
+cost_tier = "free"
+priority = 50
+approved_for_proprietary = false
+max_retries = 1
+
+[[models]]
+id = "cerebras-gpt-oss"
+provider_id = "cerebras"
+upstream_model = "gpt-oss-120b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 60
+approved_for_proprietary = false
+requests_per_minute = 5
+tokens_per_day = 1000000
+max_retries = 1
+
+[[models]]
+id = "github-models-prototype"
+provider_id = "github_models"
+upstream_model = "openai/gpt-4.1"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 70
+approved_for_proprietary = false
+requests_per_day = 50
+max_retries = 1
+
+[[models]]
+id = "nvidia-coding"
+provider_id = "nvidia_nim"
+upstream_model = "configure-current-nvidia-model-id"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "free"
+priority = 80
+approved_for_proprietary = false
+max_retries = 2
+
+[[models]]
+id = "premium-fallback"
+provider_id = "openai_premium"
+upstream_model = "configure-current-premium-model-id"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+cost_tier = "premium"
+priority = 1000
+approved_for_proprietary = false
+daily_cost_limit_usd = 1.0
+input_cost_per_million = 0.0
+output_cost_per_million = 0.0
+max_retries = 1
