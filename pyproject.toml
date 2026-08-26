@@ -43,4 +43,4 @@ line-length = 100
 target-version = "py311"
 
 [tool.vercel]
-entrypoint = "modernization_router.cloud_api:app"
+entrypoint = "src.modernization_router.cloud_api:app"
