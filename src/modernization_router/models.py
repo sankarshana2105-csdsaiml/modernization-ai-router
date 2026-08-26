@@ -109,6 +109,7 @@ class ProviderConfig:
     base_url: str
     base_url_env: str | None = None
     api_key_env: str | None = None
+    api_key_fallback_envs: tuple[str, ...] = ()
     enabled: bool = True
     timeout_seconds: float = 60.0
     extra_headers: Mapping[str, str] = field(default_factory=dict)

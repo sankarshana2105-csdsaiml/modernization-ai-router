@@ -11,7 +11,8 @@ health_cooldown_seconds = 30.0
 id = "vercel_gateway_google"
 adapter = "openai_compatible"
 base_url = "https://ai-gateway.vercel.sh/v1"
-api_key_env = "VERCEL_OIDC_TOKEN"
+api_key_env = "AI_GATEWAY_API_KEY"
+api_key_fallback_envs = ["VERCEL_OIDC_TOKEN"]
 enabled = true
 timeout_seconds = 50.0
 
@@ -19,7 +20,8 @@ timeout_seconds = 50.0
 id = "vercel_gateway_openai"
 adapter = "openai_compatible"
 base_url = "https://ai-gateway.vercel.sh/v1"
-api_key_env = "VERCEL_OIDC_TOKEN"
+api_key_env = "AI_GATEWAY_API_KEY"
+api_key_fallback_envs = ["VERCEL_OIDC_TOKEN"]
 enabled = true
 timeout_seconds = 50.0
 

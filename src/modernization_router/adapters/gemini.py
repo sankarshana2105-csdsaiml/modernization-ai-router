@@ -33,10 +33,11 @@ class GeminiAdapter(ProviderAdapter):
             raise ProviderAuthenticationError(
                 "Gemini provider requires an API key environment name"
             )
-        key = os.getenv(self.config.api_key_env)
+        env_names = (self.config.api_key_env, *self.config.api_key_fallback_envs)
+        key = next((os.getenv(name) for name in env_names if os.getenv(name)), None)
         if not key:
             raise ProviderAuthenticationError(
-                f"Required credential {self.config.api_key_env} is not configured"
+                f"None of the required credentials {', '.join(env_names)} are configured"
             )
         return {
             "content-type": "application/json",

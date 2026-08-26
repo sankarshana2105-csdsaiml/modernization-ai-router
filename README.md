@@ -84,7 +84,7 @@ For a local zero-cost model, install Ollama separately and make the configured m
 
 ## Protected cloud API
 
-The repository includes a FastAPI entrypoint for Vercel. The cloud configuration uses Vercel's automatically injected OIDC token with its OpenAI-compatible AI Gateway, so no provider credential is committed to GitHub.
+The repository includes a FastAPI entrypoint for Vercel. The cloud configuration uses an `AI_GATEWAY_API_KEY` when supplied and falls back to Vercel's automatically injected OIDC token. No provider credential is committed to GitHub.
 
 Cloud endpoints:
 

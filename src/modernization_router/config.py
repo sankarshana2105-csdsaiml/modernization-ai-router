@@ -22,6 +22,7 @@ def load_config(path: str | Path) -> RouterConfig:
             base_url=item["base_url"],
             base_url_env=item.get("base_url_env"),
             api_key_env=item.get("api_key_env"),
+            api_key_fallback_envs=tuple(item.get("api_key_fallback_envs", [])),
             enabled=item.get("enabled", True),
             timeout_seconds=float(item.get("timeout_seconds", 60.0)),
             extra_headers=item.get("extra_headers", {}),

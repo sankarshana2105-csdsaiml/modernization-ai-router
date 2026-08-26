@@ -76,6 +76,39 @@ async def test_openai_compatible_adapter_preserves_base_path(
 
 
 @pytest.mark.asyncio
+async def test_openai_compatible_adapter_uses_fallback_credential(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("MISSING_PRIMARY_KEY", raising=False)
+    monkeypatch.setenv("FALLBACK_PROVIDER_KEY", "fallback-key")
+
+    async def handler(incoming: httpx.Request) -> httpx.Response:
+        assert incoming.headers["authorization"] == "Bearer fallback-key"
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "ok"}}]},
+        )
+
+    client = httpx.AsyncClient(
+        base_url="https://provider.invalid/v1/",
+        transport=httpx.MockTransport(handler),
+    )
+    config = ProviderConfig(
+        id="fallback-compatible",
+        adapter="openai_compatible",
+        base_url="https://provider.invalid/v1",
+        api_key_env="MISSING_PRIMARY_KEY",
+        api_key_fallback_envs=("FALLBACK_PROVIDER_KEY",),
+    )
+    adapter = OpenAICompatibleAdapter(config, client=client)
+
+    response = await adapter.generate(request(), model("fallback-compatible", "free/coder"))
+
+    assert response.content == "ok"
+    await client.aclose()
+
+
+@pytest.mark.asyncio
 async def test_gemini_adapter_uses_official_generate_content_shape(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
