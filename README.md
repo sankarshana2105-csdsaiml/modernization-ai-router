@@ -85,7 +85,14 @@ For a local zero-cost model, install Ollama separately and make the configured m
 
 ## Protected cloud API
 
-The repository includes a FastAPI entrypoint for Vercel. The public-beta cloud configuration uses an `OPENROUTER_API_KEY` with the `openrouter/free` model router and caps the application at 50 requests per day. It has no paid-model fallback. No provider credential is committed to GitHub.
+The repository includes a FastAPI entrypoint for Vercel. The public-beta cloud configuration now supports ordered free-provider failover:
+
+1. OpenRouter free router
+2. Gemini free tier
+3. Groq free tier
+4. Cerebras free tier
+
+A provider participates only when its official environment credential is available in the deployment. Paid OpenAI remains disabled by default. No provider credential is committed to GitHub.
 
 Cloud endpoints:
 
@@ -94,142 +101,9 @@ Cloud endpoints:
 - `GET /docs` - OpenAPI interface documentation
 - `POST /v1/route` - protected model-routing endpoint
 
-Set a long random `ROUTER_ACCESS_KEY` in the Vercel project's Production environment before enabling AI requests. Clients send it as a bearer credential:
-
-```powershell
-$headers = @{ Authorization = "Bearer $env:ROUTER_ACCESS_KEY" }
-$body = @{
-  task = "code_analysis"
-  messages = @(@{ role = "user"; content = "Inspect this public example" })
-  privacy = "public"
-} | ConvertTo-Json -Depth 4
-
-Invoke-RestMethod `
-  -Uri "https://YOUR-DEPLOYMENT.vercel.app/v1/route" `
-  -Method Post `
-  -Headers $headers `
-  -ContentType "application/json" `
-  -Body $body
-```
+Set a long random `ROUTER_ACCESS_KEY` in the Vercel project's Production environment before enabling AI requests. Clients send it as a bearer credential.
 
 The included cloud models are deliberately not approved for proprietary code. A `proprietary` or `local_only` request therefore fails closed until the owner reviews provider data terms and explicitly changes the policy. The Docker execution worker is also not exposed by this serverless API; run it on a dedicated container host with the documented isolation controls.
-
-## SaaS integration
-
-```python
-from modernization_router import (
-    ChatMessage,
-    ModernizationAI,
-    PrivacyMode,
-    TaskType,
-    build_router,
-    load_config,
-)
-
-config = load_config("config/router.toml")
-router = build_router(config)
-ai = ModernizationAI(router)
-
-result = await ai.run(
-    TaskType.REFACTORING,
-    [ChatMessage(role="user", content=job_prompt)],
-    privacy=PrivacyMode.PROPRIETARY,
-    allow_premium_fallback=True,
-    estimated_input_tokens=estimated_tokens,
-    max_output_tokens=8_000,
-    metadata={"job_id": job_id, "tenant_id": tenant_id},
-)
-
-converted_code = result.content
-selected_model = result.model_id
-cost = result.usage.cost_usd
-```
-
-The FastAPI/controller layer should enqueue modernization work. A worker then calls `ModernizationAI`; controllers do not need provider-specific logic.
-
-## Isolated code and command execution
-
-The command runner accepts only a controlled job directory, an allowlisted runtime, and an allowlisted executable. Arguments are passed directly to Docker without a shell. The default policy supports Python, Node.js, Java, .NET, Go, and Rust build/test commands.
-
-```python
-from pathlib import Path
-
-from modernization_router import (
-    DockerSandboxExecutor,
-    ExecutionRequest,
-    VerificationWorker,
-    default_sandbox_policy,
-)
-
-jobs_root = Path("/srv/modernization/jobs")
-policy = default_sandbox_policy(jobs_root)
-executor = DockerSandboxExecutor(policy)
-verification = VerificationWorker(executor)
-
-report = await verification.verify(
-    [
-        ExecutionRequest(
-            workspace=jobs_root / job_id,
-            runtime="python",
-            command=("python", "-m", "pytest", "-q"),
-            timeout_seconds=120,
-            environment={"CI": "true"},
-        ),
-        ExecutionRequest(
-            workspace=jobs_root / job_id,
-            runtime="python",
-            command=("ruff", "check", "."),
-            timeout_seconds=60,
-        ),
-    ]
-)
-
-if not report.succeeded:
-    compact_diagnostics = report.diagnostics_for_ai()
-```
-
-Runtime images use readable tags in the example. Production deployments should replace them with reviewed image digests and preinstall dependencies so sandbox networking can remain disabled.
-
-Compilers, tests, and formatters consume no model tokens. Only compact failure diagnostics need to return to a debugging model, allowing local/free inference to handle routine repair loops.
-
-## Priority and fallback configuration
-
-Models are sorted by:
-
-1. cost tier (`free`, `cheap`, `standard`, `premium`)
-2. numeric `priority` (lower first)
-3. estimated request cost
-4. stable model ID
-
-Premium models are considered only after every eligible lower-cost model is unavailable or fails. A job can prohibit premium usage with `allow_premium_fallback=False`. Provider credentials alone never enable a disabled provider.
-
-## Quotas, health, and persistence
-
-`InMemoryQuotaTracker` is concurrency-safe within one Python process and is appropriate for local development or a single worker. Before horizontally scaling, implement the same reservation operations in Redis so every worker shares rate and daily limits.
-
-`UsageLedger` is the accounting boundary. Persist its `UsageRecord` fields to the SaaS database for tenant billing, budgets, audit history, and job-level cost reporting.
-
-`await router.health()` returns provider checks, circuit states, quota counters, and usage totals. Expose that result only through an authenticated internal operations endpoint; it should not be a public API.
-
-## Tests proving automatic continuation
-
-The test suite covers:
-
-- locally tracked daily quota exhaustion
-- provider-reported quota exhaustion
-- provider outage failover
-- retry and recovery on transient errors
-- timeout cancellation and failover
-- proprietary-code exclusion from unapproved providers
-- task-capability filtering
-- premium fallback and per-job premium prohibition
-- token/cost accounting
-- request/response compatibility for OpenAI-style and Gemini adapters
-- sandbox workspace and command-policy enforcement
-- container isolation flags and absence of Docker-socket access
-- timeout cleanup, bounded diagnostics, and stop-on-first-failure verification
-
-All provider behavior is simulated or uses in-memory HTTP transports, so tests cannot consume credits.
 
 ## Production checklist
 
