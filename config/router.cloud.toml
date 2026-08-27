@@ -4,10 +4,9 @@ backoff_max_seconds = 2.0
 health_failure_threshold = 3
 health_cooldown_seconds = 30.0
 
-# The public beta uses OpenRouter's zero-cost model router. The application
-# cannot select a paid model, and our own daily quota stays within the account's
-# published free allowance. Add other approved providers later through the same
-# adapter interface when their official keys are available.
+# Public-beta cloud routing. Providers are tried in priority order.
+# Keep paid OpenAI disabled unless explicitly approved.
+
 [[providers]]
 id = "openrouter_free"
 adapter = "openai_compatible"
@@ -16,6 +15,38 @@ api_key_env = "OPENROUTER_API_KEY"
 enabled = true
 timeout_seconds = 50.0
 extra_headers = { "HTTP-Referer" = "https://modernization-ai-router.vercel.app", "X-Title" = "Modernization AI Router" }
+
+[[providers]]
+id = "gemini"
+adapter = "gemini"
+base_url = "https://generativelanguage.googleapis.com/v1beta"
+api_key_env = "GEMINI_API_KEY"
+enabled = true
+timeout_seconds = 50.0
+
+[[providers]]
+id = "groq"
+adapter = "openai_compatible"
+base_url = "https://api.groq.com/openai/v1"
+api_key_env = "GROQ_API_KEY"
+enabled = true
+timeout_seconds = 45.0
+
+[[providers]]
+id = "cerebras"
+adapter = "openai_compatible"
+base_url = "https://api.cerebras.ai/v1"
+api_key_env = "CEREBRAS_API_KEY"
+enabled = true
+timeout_seconds = 45.0
+
+[[providers]]
+id = "openai_premium"
+adapter = "openai_compatible"
+base_url = "https://api.openai.com/v1"
+api_key_env = "OPENAI_API_KEY"
+enabled = false
+timeout_seconds = 60.0
 
 [[models]]
 id = "openrouter-free-auto"
@@ -33,3 +64,55 @@ input_cost_per_million = 0.0
 output_cost_per_million = 0.0
 max_retries = 1
 timeout_seconds = 50.0
+
+[[models]]
+id = "gemini-free-tier"
+provider_id = "gemini"
+upstream_model = "gemini-3.5-flash-lite"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
+cost_tier = "free"
+priority = 20
+approved_for_proprietary = false
+max_retries = 1
+timeout_seconds = 50.0
+
+[[models]]
+id = "groq-qwen-coder"
+provider_id = "groq"
+upstream_model = "qwen/qwen3.6-27b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
+cost_tier = "free"
+priority = 30
+approved_for_proprietary = false
+requests_per_minute = 30
+requests_per_day = 1000
+tokens_per_minute = 8000
+tokens_per_day = 200000
+max_retries = 1
+timeout_seconds = 45.0
+
+[[models]]
+id = "cerebras-gpt-oss"
+provider_id = "cerebras"
+upstream_model = "gpt-oss-120b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
+cost_tier = "free"
+priority = 40
+approved_for_proprietary = false
+requests_per_minute = 5
+tokens_per_day = 1000000
+max_retries = 1
+timeout_seconds = 45.0
+
+[[models]]
+id = "premium-fallback"
+provider_id = "openai_premium"
+upstream_model = "configure-current-premium-model-id"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
+cost_tier = "premium"
+priority = 1000
+approved_for_proprietary = false
+daily_cost_limit_usd = 1.0
+input_cost_per_million = 0.0
+output_cost_per_million = 0.0
+max_retries = 1
