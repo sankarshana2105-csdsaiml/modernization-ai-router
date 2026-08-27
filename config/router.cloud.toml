@@ -41,6 +41,14 @@ enabled = true
 timeout_seconds = 45.0
 
 [[providers]]
+id = "nvidia_nim"
+adapter = "openai_compatible"
+base_url = "https://integrate.api.nvidia.com/v1"
+api_key_env = "NVIDIA_API_KEY"
+enabled = true
+timeout_seconds = 45.0
+
+[[providers]]
 id = "openai_premium"
 adapter = "openai_compatible"
 base_url = "https://api.openai.com/v1"
@@ -101,6 +109,17 @@ priority = 40
 approved_for_proprietary = false
 requests_per_minute = 5
 tokens_per_day = 1000000
+max_retries = 1
+timeout_seconds = 45.0
+
+[[models]]
+id = "nvidia-nemotron"
+provider_id = "nvidia_nim"
+upstream_model = "nvidia/nemotron-3.5-lightning-30b-a3b"
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
+cost_tier = "free"
+priority = 50
+approved_for_proprietary = false
 max_retries = 1
 timeout_seconds = 45.0
 

@@ -16,3 +16,17 @@ def test_example_config_loads_and_keeps_premium_provider_disabled() -> None:
     premium = next(model for model in config.models if model.id == "premium-fallback")
     assert premium.cost_tier is CostTier.PREMIUM
     assert premium.approved_for_proprietary is False
+
+
+def test_cloud_config_orders_free_providers_and_disables_paid_openai() -> None:
+    path = Path(__file__).resolve().parents[1] / "config" / "router.cloud.toml"
+    config = load_config(path)
+
+    free_models = [
+        model.provider_id
+        for model in sorted(config.models, key=lambda model: model.priority)
+        if model.cost_tier is CostTier.FREE
+    ]
+    assert free_models == ["openrouter_free", "gemini", "groq", "cerebras", "nvidia_nim"]
+    assert config.providers["nvidia_nim"].api_key_env == "NVIDIA_API_KEY"
+    assert config.providers["openai_premium"].enabled is False

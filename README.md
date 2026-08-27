@@ -91,8 +91,9 @@ The repository includes a FastAPI entrypoint for Vercel. The public-beta cloud c
 2. Gemini free tier
 3. Groq free tier
 4. Cerebras free tier
+5. NVIDIA NIM free developer endpoint
 
-A provider participates only when its official environment credential is available in the deployment. Paid OpenAI remains disabled by default. No provider credential is committed to GitHub.
+A provider participates only when its official environment credential is available in the deployment. NVIDIA's hosted endpoint is intended for Developer Program prototyping, not unlimited production use. Paid OpenAI remains disabled by default. No provider credential is committed to GitHub.
 
 Cloud endpoints:
 
