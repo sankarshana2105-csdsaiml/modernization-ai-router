@@ -83,7 +83,7 @@ async def test_frontend_script_includes_project_safety_limits(
 
 
 @pytest.mark.asyncio
-async def test_route_is_disabled_until_owner_configures_access_key(
+async def test_route_rejects_unknown_key_without_primary_key(
     client: httpx.AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -94,7 +94,7 @@ async def test_route_is_disabled_until_owner_configures_access_key(
         json={"task": "code_analysis", "messages": [{"role": "user", "content": "x"}]},
     )
 
-    assert response.status_code == 503
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

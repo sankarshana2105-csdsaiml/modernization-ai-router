@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import secrets
+from hashlib import sha256
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
@@ -19,6 +20,8 @@ from .service import ModernizationAI
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "router.cloud.toml"
 STATIC_ROOT = Path(__file__).resolve().parent / "static"
+# ponytail: one public-beta client hash; move to a managed client-key table when multiple SaaS clients need independent rotation.
+KNOWORA_ACCESS_KEY_SHA256 = "3c3110e552896d46125983dc7bb159714cf48a57f7c314bbf6918534de2aa4b7"
 
 
 class MessageInput(BaseModel):
@@ -101,17 +104,15 @@ def require_access_key(
     authorization: Annotated[str | None, Header()] = None,
 ) -> None:
     expected = os.getenv("ROUTER_ACCESS_KEY")
-    if not expected:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="The API owner has not configured ROUTER_ACCESS_KEY",
-        )
-
     scheme, separator, supplied = (authorization or "").partition(" ")
+    valid_primary_key = bool(expected) and secrets.compare_digest(supplied, expected)
+    valid_knowora_key = secrets.compare_digest(
+        sha256(supplied.encode()).hexdigest(), KNOWORA_ACCESS_KEY_SHA256
+    )
     if (
         not separator
         or scheme.lower() != "bearer"
-        or not secrets.compare_digest(supplied, expected)
+        or not (valid_primary_key or valid_knowora_key)
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
