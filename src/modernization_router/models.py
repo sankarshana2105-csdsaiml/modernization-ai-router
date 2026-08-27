@@ -13,6 +13,7 @@ class TaskType(StrEnum):
     TEST_GENERATION = "test_generation"
     ARCHITECTURE = "architecture"
     DEBUGGING = "debugging"
+    KNOWLEDGE_ANSWERING = "knowledge_answering"
 
 
 class PrivacyMode(StrEnum):

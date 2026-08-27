@@ -21,7 +21,7 @@ extra_headers = { "HTTP-Referer" = "https://modernization-ai-router.vercel.app",
 id = "openrouter-free-auto"
 provider_id = "openrouter_free"
 upstream_model = "openrouter/free"
-capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging"]
+capabilities = ["code_analysis", "refactoring", "test_generation", "architecture", "debugging", "knowledge_answering"]
 cost_tier = "free"
 priority = 10
 approved_for_proprietary = false

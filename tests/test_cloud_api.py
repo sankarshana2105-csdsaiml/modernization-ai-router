@@ -138,3 +138,22 @@ async def test_route_returns_structured_router_result(
     assert payload["content"] == "No issue found."
     assert payload["usage"]["total_tokens"] == 25
     assert payload["attempts"][0]["outcome"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_route_accepts_knowledge_answering_jobs(
+    client: httpx.AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ROUTER_ACCESS_KEY", "correct-secret")
+
+    response = await client.post(
+        "/v1/route",
+        headers={"Authorization": "Bearer correct-secret"},
+        json={
+            "task": "knowledge_answering",
+            "messages": [{"role": "user", "content": "Answer from these sources"}],
+        },
+    )
+
+    assert response.status_code != 422
