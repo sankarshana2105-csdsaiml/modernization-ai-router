@@ -22,11 +22,19 @@ def test_cloud_config_orders_free_providers_and_disables_paid_openai() -> None:
     path = Path(__file__).resolve().parents[1] / "config" / "router.cloud.toml"
     config = load_config(path)
 
-    free_models = [
-        model.provider_id
+    cloud_models = [
+        model
         for model in sorted(config.models, key=lambda model: model.priority)
         if model.cost_tier is CostTier.FREE
     ]
-    assert free_models == ["openrouter_free", "gemini", "groq", "cerebras", "nvidia_nim"]
+    assert [model.provider_id for model in cloud_models] == [
+        "openrouter_free",
+        "gemini",
+        "groq",
+        "cerebras",
+        "nvidia_nim",
+    ]
+    assert all(model.max_retries == 0 for model in cloud_models)
+    assert sum(model.timeout_seconds or 0 for model in cloud_models) <= 110
     assert config.providers["nvidia_nim"].api_key_env == "NVIDIA_API_KEY"
     assert config.providers["openai_premium"].enabled is False

@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "src/modernization_router/cloud_api.py": {
-      "maxDuration": 60,
+      "maxDuration": 120,
       "excludeFiles": "{tests/**,.github/**,build/**,dist/**}"
     }
   }

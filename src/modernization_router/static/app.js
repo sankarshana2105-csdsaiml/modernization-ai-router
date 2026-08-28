@@ -197,7 +197,9 @@ form.addEventListener("submit", async (event) => {
     sourceCode,
   );
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 60_000);
+  // Keep the browser deadline below the Vercel function deadline while leaving
+  // enough time for a slow free provider to fail over to the next provider.
+  const timeout = window.setTimeout(() => controller.abort(), 110_000);
 
   runButton.disabled = true;
   runButton.firstChild.textContent = "Routing job… ";
@@ -223,7 +225,7 @@ form.addEventListener("submit", async (event) => {
         privacy: "public",
         allow_premium_fallback: false,
         estimated_input_tokens: Math.max(1, Math.ceil(prompt.length / 4)),
-        max_output_tokens: 4000,
+        max_output_tokens: 1500,
         metadata: { surface: "public_beta", file_count: String(Math.max(loadedNames.length, 1)) },
       }),
     });

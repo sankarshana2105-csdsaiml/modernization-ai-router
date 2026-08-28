@@ -13,7 +13,7 @@ adapter = "openai_compatible"
 base_url = "https://openrouter.ai/api/v1"
 api_key_env = "OPENROUTER_API_KEY"
 enabled = true
-timeout_seconds = 50.0
+timeout_seconds = 20.0
 extra_headers = { "HTTP-Referer" = "https://modernization-ai-router.vercel.app", "X-Title" = "Modernization AI Router" }
 
 [[providers]]
@@ -22,7 +22,7 @@ adapter = "gemini"
 base_url = "https://generativelanguage.googleapis.com/v1beta"
 api_key_env = "GEMINI_API_KEY"
 enabled = true
-timeout_seconds = 50.0
+timeout_seconds = 20.0
 
 [[providers]]
 id = "groq"
@@ -30,7 +30,7 @@ adapter = "openai_compatible"
 base_url = "https://api.groq.com/openai/v1"
 api_key_env = "GROQ_API_KEY"
 enabled = true
-timeout_seconds = 45.0
+timeout_seconds = 15.0
 
 [[providers]]
 id = "cerebras"
@@ -38,7 +38,7 @@ adapter = "openai_compatible"
 base_url = "https://api.cerebras.ai/v1"
 api_key_env = "CEREBRAS_API_KEY"
 enabled = true
-timeout_seconds = 45.0
+timeout_seconds = 15.0
 
 [[providers]]
 id = "nvidia_nim"
@@ -46,7 +46,7 @@ adapter = "openai_compatible"
 base_url = "https://integrate.api.nvidia.com/v1"
 api_key_env = "NVIDIA_API_KEY"
 enabled = true
-timeout_seconds = 45.0
+timeout_seconds = 15.0
 
 [[providers]]
 id = "openai_premium"
@@ -70,8 +70,8 @@ tokens_per_minute = 60000
 tokens_per_day = 300000
 input_cost_per_million = 0.0
 output_cost_per_million = 0.0
-max_retries = 1
-timeout_seconds = 50.0
+max_retries = 0
+timeout_seconds = 20.0
 
 [[models]]
 id = "gemini-free-tier"
@@ -81,8 +81,8 @@ capabilities = ["code_analysis", "refactoring", "test_generation", "architecture
 cost_tier = "free"
 priority = 20
 approved_for_proprietary = false
-max_retries = 1
-timeout_seconds = 50.0
+max_retries = 0
+timeout_seconds = 20.0
 
 [[models]]
 id = "groq-qwen-coder"
@@ -96,8 +96,8 @@ requests_per_minute = 30
 requests_per_day = 1000
 tokens_per_minute = 8000
 tokens_per_day = 200000
-max_retries = 1
-timeout_seconds = 45.0
+max_retries = 0
+timeout_seconds = 15.0
 
 [[models]]
 id = "cerebras-gpt-oss"
@@ -109,8 +109,8 @@ priority = 40
 approved_for_proprietary = false
 requests_per_minute = 5
 tokens_per_day = 1000000
-max_retries = 1
-timeout_seconds = 45.0
+max_retries = 0
+timeout_seconds = 15.0
 
 [[models]]
 id = "nvidia-nemotron"
@@ -120,8 +120,8 @@ capabilities = ["code_analysis", "refactoring", "test_generation", "architecture
 cost_tier = "free"
 priority = 50
 approved_for_proprietary = false
-max_retries = 1
-timeout_seconds = 45.0
+max_retries = 0
+timeout_seconds = 15.0
 
 [[models]]
 id = "premium-fallback"

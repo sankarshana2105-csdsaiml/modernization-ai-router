@@ -95,6 +95,8 @@ The repository includes a FastAPI entrypoint for Vercel. The public-beta cloud c
 
 A provider participates only when its official environment credential is available in the deployment. NVIDIA's hosted endpoint is intended for Developer Program prototyping, not unlimited production use. Paid OpenAI remains disabled by default. No provider credential is committed to GitHub.
 
+The cloud profile gives each provider one bounded attempt and then moves to the next provider. Its combined failover budget stays below the browser and Vercel function deadlines, preventing a late successful response from being discarded by the UI.
+
 Cloud endpoints:
 
 - `GET /` - browser-based legacy-code modernization screen
